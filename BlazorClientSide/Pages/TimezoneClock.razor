@@ -1,0 +1,83 @@
+﻿@inject HttpClient Http
+
+@if (@timezone == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="TimezoneClock">
+        <div class="clock-wrapper">
+            <span class="second-wrapper" style='--deg:@(timezone.ClockSecondsDegree)deg'></span>
+            <span class="minute-wrapper" style='--deg:@(timezone.ClockMinutesDegree)deg'></span>
+            <span class="hour-wrapper" style='--deg:@(timezone.ClockHoursDegree)deg'></span>
+        </div>
+        <div class="text-align--center">
+            <span class="readable-day">@timezone.DatetimeReadableDay</span>
+            <span class="readable-time"><span>@timezone.DatetimeReadableHour</span>:<span>@timezone.DatetimeReadableMinute</span>:<span>@timezone.DatetimeReadableSecond @timezone.DatetimeReadablePeriod</span></span>
+        </div>
+        <hr />
+        <div class="text-align--center">
+            <span class="readable-day">@TimezoneLocation</span>
+        </div>
+    </div>
+
+}
+
+@code {
+// A parent can supply parameters to its child component
+[Parameter] string TimezoneLocation { get; set; }
+
+private TimeZone timezone;
+private HttpResponseMessage timezonesResponse;
+private System.Timers.Timer timer;
+
+protected override async Task OnInitAsync()
+{
+    // Set up timer
+    timer = new System.Timers.Timer();
+    timer.Interval = 1000;
+    timer.Enabled = true;
+    timer.Elapsed += OnTick;
+
+    timezone = await Http.GetJsonAsync<TimeZone>($"http://worldtimeapi.org/api/timezone/{TimezoneLocation}.json");
+    timezone.DatetimeConversion = DateTimeOffset.Parse(timezone.Datetime);
+}
+
+private void OnTick(Object source, System.Timers.ElapsedEventArgs e)
+{
+    Console.WriteLine();
+    Console.WriteLine("The Elapsed event was raised at {0}", e.SignalTime.TimeOfDay);
+    timezone.DatetimeConversion = timezone.DatetimeConversion.AddMilliseconds(timer.Interval);
+
+    // Readable times
+    timezone.DatetimeReadableDay = timezone.DatetimeConversion.DayOfWeek.ToString();
+    timezone.DatetimeReadableHour = timezone.DatetimeConversion.Hour.ToString();
+    timezone.DatetimeReadablePeriod = (timezone.DatetimeConversion.Hour >= 12) ? "pm" : "am";
+    timezone.DatetimeReadableMinute = timezone.DatetimeConversion.Minute.ToString();
+    timezone.DatetimeReadableSecond = timezone.DatetimeConversion.Second.ToString();
+
+    // Computed degrees from new time
+    timezone.ClockSecondsDegree = timezone.DatetimeConversion.Second * 6;
+    timezone.ClockMinutesDegree = timezone.DatetimeConversion.Minute * 6;
+    timezone.ClockHoursDegree = timezone.DatetimeConversion.Hour % 12 * 30;
+    StateHasChanged();
+}
+
+class TimeZone
+{
+    public string UnixtimeReadable { get; set; }
+    public int Unixtime { get; set; }
+    public string Datetime { get; set; }
+    public DateTimeOffset DatetimeConversion { get; set; }
+    public string DatetimeReadableDay { get; set; }
+    public string DatetimeReadableHour { get; set; }
+    public string DatetimeReadablePeriod { get; set; }
+    public string DatetimeReadableMinute { get; set; }
+    public string DatetimeReadableSecond { get; set; }
+    public int ClockSeconds { get; set; }
+    public int ClockMinutesDegree { get; set; }
+    public int ClockSecondsDegree { get; set; }
+    public int ClockHoursDegree { get; set; }
+}
+}

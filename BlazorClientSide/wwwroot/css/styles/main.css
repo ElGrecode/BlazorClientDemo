@@ -1,4 +1,14 @@
-﻿.clock-wrapper {
+﻿.text-align--center {
+    text-align: center;
+}
+
+.TimezoneClock {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+}
+
+.clock-wrapper {
     background: #ededed;
     height: 200px;
     width: 200px;
@@ -6,6 +16,7 @@
     text-align: center;
     box-sizing: content-box;
     padding: 20px;
+    border-radius: 50%;
 }
 
 .second-wrapper {
@@ -15,8 +26,8 @@
     display: inline-block;
     border-top-left-radius: 1px;
     border-top-right-radius: 1px;
-    background: black;
-    transition: 300ms ease-in-out;
+    background: #f14848;
+    transition: all 100ms cubic-bezier(0.000, 1.405, 0.680, 1.145); /* custom */
     transform: rotate(var(--deg));
     transform-origin: bottom;
 }
@@ -29,7 +40,7 @@
     display: inline-block;
     border-top-left-radius: 1px;
     border-top-right-radius: 1px;
-    background: blue;
+    background: #a45981;
     transition: 300ms ease-in-out;
     transform: rotate(var(--deg));
     transform-origin: bottom;
@@ -43,8 +54,18 @@
     display: inline-block;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
-    background: green;
+    background: #9cc79c;
     transition: 2000ms ease-in-out;
     transform: rotate(var(--deg));
     transform-origin: bottom;
+}
+
+.readable-day {
+    font-size: 26px;
+}
+
+.readable-time {
+    font-weight: 600;
+    font-family: 'Roboto Mono for Powerline';
+    font-size: 26px;
 }
